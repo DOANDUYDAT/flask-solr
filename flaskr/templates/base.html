@@ -1,0 +1,108 @@
+<!doctype html>
+<title>{% block title %}{% endblock %} - Flaskr</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/search.css') }}">
+
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+<link href="https://fonts.googleapis.com/css?family=Poppins:400,600,700" rel="stylesheet" />
+
+<nav>
+  <h1><a href="{{ url_for('index') }}">Flaskr</a></h1>
+  <ul>
+    {% if g.user %}
+    <li><span>{{ g.user['username'] }}</span>
+    <li><a href="{{ url_for('auth.logout') }}">Log Out</a>
+      {% else %}
+    <li><a href="{{ url_for('auth.register') }}">Register</a>
+    <li><a href="{{ url_for('auth.login') }}">Log In</a>
+      {% endif %}
+  </ul>
+</nav>
+<section class="content">
+  <header>
+    {% block header %}{% endblock %}
+  </header>
+  {% for message in get_flashed_messages() %}
+  <div class="flash">{{ message }}</div>
+  {% endfor %}
+  {% block content %}{% endblock %}
+</section>
+
+<!-- <script src=" {{ url_for('static', filename='js/extention/choices.js') }}"></script> -->
+<script>
+  const customSelects = document.querySelectorAll("select");
+  const deleteBtn = document.getElementById('delete');
+  const categories = [];
+
+  const button = document.querySelectorAll("button.btn-section");
+  for (i = 0; i < button.length; i++) {
+    button[i].addEventListener("click", function () {
+      categories.push(button[i].textNode);
+    })
+  }
+
+  const buttonSearch = document.querySelector("button.btn-search");
+  buttonSearch.addEventListener("click", function (e) {
+    e.preventDefault();
+    const searchText = document.getElementById("search").innerHTML;
+    let data = {
+      search: 'hello',
+      category: 'categories'
+    };
+    const options = {
+      method: 'post',
+      url: 'http://localhost:5000/auth/search',
+      headers: { 'Content-type': 'application/json' },
+      data: JSON.stringify(data)
+    }
+    axios(options).then(function (response) {
+      // handle success
+      console.log(response);
+    })
+      .catch(function (error) {
+        // handle error
+        console.log(error);
+      })
+
+  });
+
+
+  // const choices = new Choices('select',
+  //   {
+  //     searchEnabled: false,
+  //     itemSelectText: '',
+  //     removeItemButton: true,
+  //   });
+  // for (let i = 0; i < customSelects.length; i++) {
+  //   customSelects[i].addEventListener('addItem', function (event) {
+  //     if (event.detail.value) {
+  //       let parent = this.parentNode.parentNode
+  //       parent.classList.add('valid')
+  //       parent.classList.remove('invalid')
+  //     }
+  //     else {
+  //       let parent = this.parentNode.parentNode
+  //       parent.classList.add('invalid')
+  //       parent.classList.remove('valid')
+  //     }
+  //   }, false);
+  // }
+
+
+  // deleteBtn.addEventListener("click", function (e) {
+  //   e.preventDefault()
+  //   const deleteAll = document.querySelectorAll('.choices__button')
+  //   for (let i = 0; i < deleteAll.length; i++) {
+  //     deleteAll[i].click();
+  //   }
+  // });
+
+</script>
+<style>
+  div.s010 {
+    background-image: url('/static/images/background.jpg');
+
+  }
+</style>
