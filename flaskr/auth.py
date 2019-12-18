@@ -1,7 +1,7 @@
 import functools
 
 from flask import jsonify
-
+from flask_cors import CORS, cross_origin
 from flask import Blueprint
 from flask import flash
 from flask import g
@@ -12,11 +12,17 @@ from flask import session
 from flask import url_for
 from werkzeug.security import check_password_hash
 from werkzeug.security import generate_password_hash
+import requests
 
 from flaskr.db import get_db
 
-bp = Blueprint("auth", __name__, url_prefix="/auth")
+import json
 
+
+
+bp = Blueprint("auth", __name__, url_prefix="/auth")
+CORS(bp)
+# bp.config['CORS_HEADERS'] = 'Content-Type'
 
 def login_required(view):
     """View decorator that redirects anonymous users to the login page."""
@@ -83,6 +89,35 @@ def register():
     return render_template("auth/register.html")
 
 
+def get_solr(data):
+    search = data["search"]
+    category = data["category"]
+    # if(category == ''):
+    #     category = 'doi-song.chn'
+    # if(category == ''):
+    #     category = 'an-quay-di.chn'
+    # if(category == ''):
+    #     category = 'xa-hoi.chn'
+    # if(category == ''):
+    #     category = 'the-gioi.chn'
+    # if(category == ''):
+    #     category = 'sport.chn'
+    # if(category == ''):
+    #     category = 'hoc-duong.chn'
+    # if(category == ''):
+    #     category = 'cine.chn'
+    # if(category == ''):
+    #     category = 'tv-show.chn'
+    # if(category == ''):
+    #     category = 'star.chn'
+    param={
+        'q':'title:'+search+' OR content:'+search
+        # 'fq':'cat:'+category
+    }
+    f = requests.post('http://localhost:8983/solr/coreaa/select',data=param)
+    x = f.json()["response"]["docs"]
+    return x
+
 @bp.route("/login", methods=("GET", "POST"))
 def login():
     """Log in a registered user by adding the user id to the session."""
@@ -112,6 +147,7 @@ def login():
 
 
 @bp.route("/search", methods=("GET", "POST"))
+# @cross_origin()
 def search():
     """Log in a registered user by adding the user id to the session."""
     if request.method == "POST":
@@ -120,9 +156,11 @@ def search():
         # search = getattr(request.data, 'search')
         category = data["category"]
         search = data['search']
-        result = get_solr(jsonify(search=search, category=category))
+        x = {'search':search, "category":category}
+        result = get_solr(x)
         # print(category)
-        return jsonify(result)
+        print(result)
+        return jsonify(data=result)
 
     return render_template("auth/search.html")
 
@@ -134,3 +172,4 @@ def logout():
     """Clear the current session, including the stored user id."""
     session.clear()
     return redirect(url_for("index"))
+

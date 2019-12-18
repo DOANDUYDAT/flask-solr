@@ -1,11 +1,59 @@
 import os
 
 from flask import Flask
+from flask_cors import CORS, cross_origin
 
+from flask import jsonify
+
+from flask import Blueprint
+from flask import flash
+from flask import g
+from flask import redirect
+from flask import render_template
+from flask import request
+from flask import session
+from flask import url_for
+from werkzeug.security import check_password_hash
+from werkzeug.security import generate_password_hash
+import requests
+
+from flaskr.db import get_db
+
+import json
+
+def get_solr(data):
+    search = data["search"]
+    category = data["category"]
+    # if(category == ''):
+    #     category = 'doi-song.chn'
+    # if(category == ''):
+    #     category = 'an-quay-di.chn'
+    # if(category == ''):
+    #     category = 'xa-hoi.chn'
+    # if(category == ''):
+    #     category = 'the-gioi.chn'
+    # if(category == ''):
+    #     category = 'sport.chn'
+    # if(category == ''):
+    #     category = 'hoc-duong.chn'
+    # if(category == ''):
+    #     category = 'cine.chn'
+    # if(category == ''):
+    #     category = 'tv-show.chn'
+    # if(category == ''):
+    #     category = 'star.chn'
+    param={
+        'q':'title:'+search+' OR content:'+search
+        # 'fq':'cat:'+category
+    }
+    f = requests.post('192.168.0.173:8983/solr/coreaa/select',data=param)
+    return f
 
 def create_app(test_config=None):
     """Create and configure an instance of the Flask application."""
     app = Flask(__name__, instance_relative_config=True)
+    cors = CORS(app)
+    app.config['CORS_HEADERS'] = 'Content-Type'
     app.config.from_mapping(
         # a default secret that should be overridden by instance config
         SECRET_KEY="dev",
@@ -29,6 +77,22 @@ def create_app(test_config=None):
     @app.route("/hello")
     def hello():
         return "Hello, World!"
+
+    # @app.route("/search", methods=("GET", "POST"))
+    # @cross_origin()
+    # def search():
+    #     """Log in a registered user by adding the user id to the session."""
+    #     if request.method == "POST":
+    #         # print(request.get_json())
+    #         data = request.get_json()
+    #         # search = getattr(request.data, 'search')
+    #         category = data["category"]
+    #         search = data['search']
+    #         result = get_solr(jsonify(search=search, category=category))
+    #         # print(category)
+    #         return jsonify(result)
+
+    # return render_template("search.html")
 
     # register the database commands
     from flaskr import db

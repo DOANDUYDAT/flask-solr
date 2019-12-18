@@ -5,6 +5,8 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/search.css') }}">
 
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+
 
 <link href="https://fonts.googleapis.com/css?family=Poppins:400,600,700" rel="stylesheet" />
 
@@ -46,9 +48,9 @@
   const buttonSearch = document.querySelector("button.btn-search");
   buttonSearch.addEventListener("click", function (e) {
     e.preventDefault();
-    const searchText = document.getElementById("search").innerHTML;
+    const searchText = document.querySelector('#search').value;
     let data = {
-      search: 'hello',
+      search: searchText,
       category: 'categories'
     };
     const options = {
@@ -58,6 +60,17 @@
       data: JSON.stringify(data)
     }
     axios(options).then(function (response) {
+      let rs = response.data
+      let x = JSON.parse(rs)
+      console.log(x)
+      x.map(item=>{
+        let title = item.title
+        let url = item.url
+        let content = item.content
+        let date = item.date
+        content = content.subStr(0,150)
+        $(".container").append("<div class='row_result'><div class='link_search'><h1>" + title + "</h1><p>" + url + "</div><div class='content'><span>" + date + "</span><h3>" + content + "</h3></div></div>")
+      })
       // handle success
       console.log(response);
     })
